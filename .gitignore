@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+.env
+.streamlit/secrets.toml
+data/*
+!data/README.md
+!data/synthetic_sales.csv
+!data/synthetic_metadata.json
+__MACOSX/
+._*
