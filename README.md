@@ -1,9 +1,19 @@
 # Retail sales dashboard
 
-My Data Visualisation project uses Streamlit and Plotly to explore retail sales
+An interactive Streamlit and Plotly dashboard to explore retail sales
 by product family, shop, state and time. It also compares promotion groups and
 daily sales with an oil-price series. The application starts with a clearly
 labelled **synthetic example**; no displayed figure describes a real retailer.
+
+![Store-analysis dashboard displaying synthetic sales, yearly totals and product-family rankings](docs/images/store-analysis.png)
+
+Existing application screenshot synchronised from the project collection.
+Select **Store analysis → store 1** with the bundled fixture to reproduce the
+displayed view: 31,459.6 synthetic sales units across three product families.
+
+**Technical focus:** explicit data contracts, transaction-grain checks, missing
+periods and careful comparisons across four interactive views. Built with
+Python, pandas, Streamlit, Plotly and statsmodels.
 
 ## Run
 
@@ -41,8 +51,9 @@ omits most months and some oil observations. Regenerate it with
 The available output is the runnable synthetic dashboard, not reproduced
 real-company KPIs. All four views were exercised with Streamlit AppTest; the
 actual local server returned HTTP 200 for its health endpoint and root page.
-Browser rendering, responsive layout and end-to-end browser interaction remain
-unverified.
+The existing screenshot shows the desktop interface; browser rendering,
+responsive layouts and live browser interaction were not re-tested in this
+review. Automated AppTest coverage exercises all four views and their selectors.
 
 ## Tests
 
