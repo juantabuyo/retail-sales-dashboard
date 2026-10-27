@@ -57,11 +57,25 @@ def load_local_data(csv_path, metadata_path=None):
         metadata_path = Path(metadata_path)
         if not metadata_path.is_file():
             raise ValueError('The configured metadata file does not exist.')
-        metadata.update(json.loads(metadata_path.read_text()))
-    if metadata['transactions_grain'] not in {'unknown', 'date_store', 'sales_row'}:
-        raise ValueError('transactions_grain must be unknown, date_store or sales_row.')
+        declared = json.loads(metadata_path.read_text())
+        if not isinstance(declared, dict):
+            raise ValueError('The metadata file must contain a JSON object.')
+        metadata.update(declared)
+    validate_metadata(metadata)
     transaction_table(frame, metadata['transactions_grain'])
     return frame, metadata
+
+
+def validate_metadata(metadata):
+    """Reject metadata whose types the application would otherwise fail on while rendering."""
+    if not isinstance(metadata['synthetic'], bool):
+        raise ValueError('Metadata "synthetic" must be a JSON boolean.')
+    for field in ('source', 'sales_unit', 'oil_unit'):
+        if not isinstance(metadata[field], str) or not metadata[field].strip():
+            raise ValueError(f'Metadata "{field}" must be a non-empty string.')
+    # A tuple, not a set: an unhashable JSON value (list or object) is then rejected like any other.
+    if metadata['transactions_grain'] not in ('unknown', 'date_store', 'sales_row'):
+        raise ValueError('transactions_grain must be unknown, date_store or sales_row.')
 
 
 def transaction_table(frame, grain):

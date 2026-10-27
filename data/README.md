@@ -40,8 +40,10 @@ documentation**:
 Choose `date_store` only if the source defines daily store totals repeated on
 family rows. Their values must agree within each date/store. Choose `sales_row`
 only when the counts are genuinely additive at the sales-row grain. The default
-`unknown` hides transaction totals. Metadata is a declaration, not independent
-proof of source validity or a licence.
+`unknown` hides transaction totals. `synthetic` must be a JSON boolean and
+`source`, `sales_unit` and `oil_unit` non-empty strings; other types are rejected
+when the file is loaded. Metadata is a declaration, not independent proof of
+source validity or a licence.
 
 To use the original university data, request the two authorised CSV parts and
 their dictionary/licence from the course source. Their remote identifiers do not

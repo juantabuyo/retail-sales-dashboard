@@ -1,27 +1,26 @@
 # Retail sales dashboard
 
-An interactive Streamlit and Plotly dashboard to explore retail sales
+My Data Visualisation project uses Streamlit and Plotly to explore retail sales
 by product family, shop, state and time. It also compares promotion groups and
 daily sales with an oil-price series. The application starts with a clearly
 labelled **synthetic example**; no displayed figure describes a real retailer.
 
-![Store-analysis dashboard displaying synthetic sales, yearly totals and product-family rankings](docs/images/store-analysis.png)
+![Browser view of synthetic store 1 sales, yearly totals and product-family rankings](docs/images/store-analysis-macos-2026-10-26.png)
 
-Existing application screenshot synchronised from the project collection.
-Select **Store analysis → store 1** with the bundled fixture to reproduce the
-displayed view: 31,459.6 synthetic sales units across three product families.
-
-**Technical focus:** explicit data contracts, transaction-grain checks, missing
-periods and careful comparisons across four interactive views. Built with
-Python, pandas, Streamlit, Plotly and statsmodels.
+**Store analysis → store 1**, captured in Chromium on macOS on 26 October 2026.
+This shows the upper section of the live application with the bundled fictitious
+data. All displayed units and totals are synthetic; the promotion section
+continues below the captured area.
 
 ## Run
 
-Python 3.12; tested with 3.12.14. From this folder:
+Tested with Python 3.12.2 on macOS and Python 3.12.14, using pip 26.2.2 and
+Streamlit 1.66.1. From this folder:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
@@ -49,11 +48,37 @@ omits most months and some oil observations. Regenerate it with
    scatter with an OLS line where defined.
 
 The available output is the runnable synthetic dashboard, not reproduced
-real-company KPIs. All four views were exercised with Streamlit AppTest; the
-actual local server returned HTTP 200 for its health endpoint and root page.
-The existing screenshot shows the desktop interface; browser rendering,
-responsive layouts and live browser interaction were not re-tested in this
-review. Automated AppTest coverage exercises all four views and their selectors.
+real-company KPIs. All four views and their selectors passed Streamlit AppTest.
+A separate Chromium run opened all four views, selected store 1 and Example
+North, and checked visible Plotly charts without application or browser errors.
+It used a 1600 × 1100 desktop viewport; mobile layouts and other browsers remain
+unchecked.
+
+![Visible exploratory section with a sparse synthetic sales calendar and daily sales versus oil-index scatter](docs/images/exploratory-insights-macos-2026-10-26.png)
+
+**Exploratory insights**, lower visible section from the same browser run.
+Blank calendar cells are unobserved months. The scatter and OLS line describe
+an association in synthetic data, without a causal interpretation.
+[More views and capture instructions](docs/screenshots.md) explain the inputs,
+selectors and the limits of these partial-page screenshots.
+
+## Source and interpretation
+
+| File | Role |
+|---|---|
+| `app.py` | Four views, filters, chart layout and descriptive summaries |
+| `data_utils.py` | Schema checks, transaction grain, missing periods and comparable-month rules |
+| `make_demo_data.py` | Seeded fixture generator; running it replaces the bundled synthetic data |
+| `data/` | Synthetic CSV, metadata and the contract for authorised inputs |
+| `tests/test_dashboard.py` | Aggregation checks and AppTest interactions |
+| `tests/test_metadata_contract.py` | Metadata type validation, including the error shown by the app |
+
+The project implements the aggregation and coverage rules. pandas performs the
+filtering and grouping; Plotly renders the charts, statsmodels fits the optional
+OLS line and Streamlit manages the interface. For example, store 1 has three
+observed families and **31,459.59 synthetic sales units** across all included
+dates. That total includes January and March 2025 and January 2026; it is not a
+full-year revenue figure.
 
 ## Tests
 
@@ -61,11 +86,15 @@ review. Automated AppTest coverage exercises all four views and their selectors.
 python -m unittest discover -s tests -v
 ```
 
-Eight tests cover schema and unique keys, transaction grain, missing months,
+All eight tests passed in both tested Python environments. They cover schema
+and unique keys, transaction grain, missing months,
 complete same-month comparisons, all four AppTest views and selector changes,
 zero/constant/missing data and absent inputs. They inspect Plotly specifications
 and exercise the OLS branch. AppTest does not check browser appearance or live
 WebSocket interaction.
+
+`tests/test_metadata_contract.py` adds four tests for the metadata types. With the
+eight tests above, all 12 passed on Python 3.12.2 on macOS.
 
 ## Use your own authorised data
 
@@ -81,7 +110,12 @@ python -m streamlit run app.py
 daily dates, numeric values, store mappings and unique `date/store/family` keys.
 `family` means product family, not SKU. Units come from metadata; no currency is
 assumed. Transaction totals require an explicit daily-store or additive-row grain;
-otherwise they remain hidden.
+otherwise they remain hidden. Metadata `source`, `sales_unit` and `oil_unit`
+must be non-empty strings, and `synthetic` must be a JSON boolean. A metadata
+file that is not a JSON object, or has any other type in these fields or in
+`transactions_grain`, is rejected with an error message before any view is drawn.
+A `synthetic` value written as a string such as `"false"` is therefore no longer
+accepted.
 
 Missing months stay missing. Percentage comparisons require matching calendar
 months, full observed daily coverage, matching store/family pairs and a positive
